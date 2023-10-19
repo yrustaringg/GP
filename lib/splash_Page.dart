@@ -4,7 +4,6 @@ import 'package:flutter_application_1/AddPatient.dart';
 import '/core/colors.dart';
 import '/core/space.dart';
 import '/core/text_style.dart';
-import '/data/demo.dart';
 
 import '/widget/main_button.dart';
 
@@ -20,14 +19,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: white,
+      //  backgroundColor: white,
       body: Stack(
         children: [
           Container(
             height: height,
             color: blackBG,
             child: Image.asset(
-              "Flutter-Login-Page-UI-master\Flutter-Login-Page-UI-master\assets\images\patient.png",
+              "assets/images/background.jpeg",
               height: height,
               fit: BoxFit.cover,
             ),
@@ -50,16 +49,10 @@ class _HomePageState extends State<HomePage> {
                   RichText(
                     text: TextSpan(children: [
                       TextSpan(
-                        text: 'TheraSense',
-                        style: headline,
+                        text: 'The greatest wealth is health.',
+                        style: headlineDot,
                       ),
                     ]),
-                  ),
-                  SpaceVH(height: 20.0),
-                  Text(
-                    splashText,
-                    textAlign: TextAlign.center,
-                    style: headline2,
                   ),
                   Mainbutton(
                     onTap: () {
@@ -68,8 +61,9 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                               builder: (builder) => AddPatient()));
                     },
-                    btnColor: Color.fromARGB(255, 24, 98, 87),
+                    btnColor: Color.fromARGB(255, 255, 255, 255),
                     text: 'Get Started',
+                    txtColor: Color(0xFF186257),
                   ),
                 ],
               ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/background.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quickalert/quickalert.dart';
 
 class AddPatient extends StatefulWidget {
   const AddPatient({Key? key}) : super(key: key);
@@ -13,10 +15,52 @@ class AddPatient extends StatefulWidget {
 class _AddPatientState extends State<AddPatient> {
   final _formKey = GlobalKey<FormState>();
   late DateTime selectedDate;
-  final _date = TextEditingController();
+  final _patientnameController = TextEditingController();
+  final _idController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+ 
 
-  bool isMaleSelected = true;
-  bool isFemaleSelected = false;
+  Future Addpatient() async {
+    Map<String, String> dataToSave = {
+      'Patient Name': _patientnameController.text,
+      'ID': _idController.text,
+      'Date of Birth': _dateController.text,
+      'Phone Number': _phoneController.text,
+      'Email': _emailController.text,
+    };
+//Check if any of the fields are empty
+    bool allFieldsNotEmpty = true;
+   
+
+    dataToSave.forEach((key, value) {
+      if (value.isEmpty) {
+        allFieldsNotEmpty = false;
+        //emptyField = key;
+      }
+    });
+
+    if (allFieldsNotEmpty) {
+      QuickAlert.show(
+          context: context,
+          text: "The Patient is in your list now!",
+          type: QuickAlertType.success);
+      FirebaseFirestore.instance.collection('Patient').add(dataToSave);
+      // All fields are not empty, proceed with adding the patient.
+      // Add your code to save the patient data here.
+    } else {
+      // Display an error message
+      final scaffold = ScaffoldMessenger.of(context);
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text('Please fill out the fields.'),
+        ),
+      );
+    }
+
+    //Navigator.push(context, MaterialPageRoute(builder: (context) => Homepage));
+  }
   // TextEditingController _dateController = TextEditingController();
   //late DateTime selectedDate;
 
@@ -91,6 +135,7 @@ class _AddPatientState extends State<AddPatient> {
                         TextFormField(
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
+                            controller: _patientnameController,
                             decoration: InputDecoration(
                               labelText: 'Patient Name',
                               hintText: '',
@@ -115,9 +160,10 @@ class _AddPatientState extends State<AddPatient> {
                         TextFormField(
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
+                            controller: _idController,
                             decoration: InputDecoration(
                               labelText: 'ID',
-                              hintText: 'XXXXXXXXXX',
+                              hintText: 'XXXXX',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(20),
                                 borderSide: BorderSide(
@@ -129,9 +175,11 @@ class _AddPatientState extends State<AddPatient> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Full name is required';
+                                return 'ID is required';
                               } else if (!value.contains(RegExp(r'^[0-9]+$'))) {
                                 return 'Please enter digits only';
+                              } else if (value.length > 5) {
+                                return 'ID must be at most 5 digits';
                               }
                               return null;
                             }),
@@ -139,6 +187,7 @@ class _AddPatientState extends State<AddPatient> {
                         TextFormField(
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
+                            controller: _phoneController,
                             decoration: InputDecoration(
                               labelText: 'Phone Number',
                               hintText: '05XXXXXXXX',
@@ -153,25 +202,25 @@ class _AddPatientState extends State<AddPatient> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Full name is required';
+                                return 'Phone Number is required';
                               } else if (!RegExp(r'^05[0-9]+$')
                                   .hasMatch(value)) {
                                 if (!RegExp(r'^05').hasMatch(value)) {
-                                  return 'Please start with \'05\'';
+                                  return 'Please start your number with \'05\'';
                                 } else {
                                   return 'Please enter digits only';
                                 }
                               } else if (value.length > 10) {
-                                return 'Phone number should not exceed 10 digits';
+                                return 'Phone number must be 10 digits';
                               }
                               return null;
                             }),
                         SizedBox(height: 10),
                         TextFormField(
-                          controller: _date,
+                          controller: _dateController,
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           decoration: InputDecoration(
-                            labelText: 'Date of birth',
+                            labelText: 'Date of Birth',
                             hintText: '',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -191,7 +240,7 @@ class _AddPatientState extends State<AddPatient> {
                                 lastDate: currentDate);
                             if (pickeddate != null) {
                               setState(() {
-                                _date.text =
+                                _dateController.text =
                                     DateFormat('yyyy-MM-dd').format(pickeddate);
                               });
                             }
@@ -201,9 +250,10 @@ class _AddPatientState extends State<AddPatient> {
                         TextFormField(
                             autovalidateMode:
                                 AutovalidateMode.onUserInteraction,
+                            controller: _emailController,
                             decoration: InputDecoration(
                               labelText: 'Email Adress',
-                              hintText: 'example@example.com',
+                              hintText: 'xxxx@xxxxx.com',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(20),
                                 borderSide: BorderSide(
@@ -223,46 +273,30 @@ class _AddPatientState extends State<AddPatient> {
                               // If it is repeated, return an error message.
                               return null;
                             }),
-                        SizedBox(height: 10),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text('Choose your gender'),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                if (isMaleSelected) Text('Male'),
-                                Switch(
-                                  value: isMaleSelected,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      isMaleSelected = value;
-                                      isFemaleSelected = !value;
-                                    });
-                                  },
+                      
+                        SizedBox(height: 20),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 25),
+                          child: GestureDetector(
+                            onTap: Addpatient,
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF186257),
+                                borderRadius: BorderRadius.circular(
+                                    15), // Rounded borders
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Add',
+                                  style: TextStyle(
+                                    color: Colors.white, // White text color
+                                  ),
                                 ),
-                                if (isFemaleSelected) Text('Female'),
-                              ],
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Implement sign-up logic here
-                          },
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(Color(0xFF186257)),
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(35),
                               ),
                             ),
                           ),
-                          child: Text('Save'),
-                        ),
-                        SizedBox(height: 10),
+                        )
                       ],
                     ),
                   ),

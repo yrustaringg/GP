@@ -1,4 +1,0 @@
-const String splashText = """
- TheraSense.
-
- """;
